@@ -1,0 +1,8 @@
+*
+!Dockerfile
+!package.json
+!server.cjs
+!dist/
+!dist/**
+!tests/
+!tests/**

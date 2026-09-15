@@ -1,0 +1,36 @@
+.technical-chart{padding:6px 22px 16px;color:#3b5147;min-width:0}
+.period-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:8px 0 14px;border-bottom:1px solid #e8eee9}
+.period-tabs{display:flex;gap:4px;background:#f0f4f1;border-radius:6px;padding:4px}
+.period-tabs button,.sub-toolbar button{border:0;background:transparent;padding:8px 13px;border-radius:4px;font-size:14px;color:#657c70;min-height:36px}
+.period-tabs button.on{background:#1a644d;color:#fff;box-shadow:0 1px 4px #183d2520}
+.chart-window{display:flex;align-items:center;gap:8px;margin:0;font-size:12px;white-space:nowrap}
+.chart-window select{margin:0;padding:7px 8px;width:auto;font-size:13px}
+.chart-session{font-size:12px;color:#73887b}
+.indicator-controls{display:flex;align-items:center;flex-wrap:wrap;gap:8px 13px;padding:14px 0}
+.indicator-controls>span,.sub-toolbar>span{font-size:12px;color:#6b8174}
+.indicator-controls label{display:flex;align-items:center;gap:5px;margin:0;font-size:13px;color:#4c6257;cursor:pointer;min-height:28px}
+.indicator-controls input{display:inline-block;width:14px;height:14px;padding:0;margin:0;accent-color:var(--line-color)}
+.indicator-controls i{display:block;width:13px;height:2px;background:var(--line-color)}
+.bar-readout{display:flex;flex-wrap:wrap;gap:6px 13px;min-height:47px;font-size:12px;padding:9px 11px;background:#f5f8f6;border-radius:5px;font-variant-numeric:tabular-nums}
+.bar-readout strong{flex-basis:100%;font-weight:600;color:#345846}
+.indicator-readout{display:flex;flex-wrap:wrap;gap:6px 12px;min-height:35px;padding:10px 0;font-size:12px;font-variant-numeric:tabular-nums}
+.technical-plot{position:relative;padding-right:61px;margin-top:4px}
+.technical-plot svg{display:block;width:100%;overflow:visible}
+.price-plot svg{height:285px}.lower-plot svg{height:115px}
+.technical-axis{position:absolute;right:0;top:4%;bottom:4%;width:55px;display:flex;flex-direction:column;justify-content:space-between;color:#7a8b82;font-size:12px;font-variant-numeric:tabular-nums;text-align:right}
+.crosshair{pointer-events:none}
+.sub-toolbar{border-top:1px solid #e7eee8;margin-top:17px;padding-top:12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.sub-toolbar>div{display:flex;flex-wrap:wrap;gap:2px}
+.sub-toolbar button{font-size:13px;padding:6px 10px;min-height:32px}
+.sub-toolbar button.on{background:#e6f0e9;color:#175e46;font-weight:600}
+.lower-heading{display:flex;flex-wrap:wrap;justify-content:space-between;gap:5px 12px;font-size:12px;margin:13px 0 6px;min-height:30px;color:#697f72}
+.lower-heading strong{font-weight:500}.lower-heading span{font-variant-numeric:tabular-nums}
+.volume-unit{position:absolute;right:3px;bottom:-14px;font-size:10px;color:#84958a}
+.technical-dates{display:flex;justify-content:space-between;gap:2px;padding-right:61px;color:#7b8f82;font-size:11px;margin-top:13px;font-variant-numeric:tabular-nums}
+.scrubber-label{display:flex;align-items:center;gap:12px;margin:15px 0 8px;font-size:12px;color:#647d6d}
+.scrubber-label input{flex:1;width:0;margin:0;padding:0;accent-color:#1a644d;border:0;cursor:ew-resize;height:24px}
+.chart-note{font-size:12px;line-height:1.8;margin:10px 0;color:#7f9085}
+.indicator-help{font-size:12px;line-height:1.8;color:#758b7c}
+.indicator-help summary{cursor:pointer;color:#356c50}.indicator-help p{margin:8px 0}
+@media(min-width:1100px){.market-grid{grid-template-columns:minmax(310px,.85fr) minmax(510px,1.6fr)}}
+@media(max-width:650px){.technical-chart{padding:4px 14px 14px}.period-toolbar{gap:10px}.period-tabs{flex:1;justify-content:space-between}.period-tabs button{padding:8px 12px}.chart-window{margin-left:auto}.indicator-controls{gap:5px 10px}.indicator-controls>span{flex-basis:100%}.indicator-controls label{font-size:12px}.bar-readout{font-size:12px;gap:5px 10px}.technical-plot{padding-right:51px}.technical-axis{width:48px;font-size:11px}.price-plot svg{height:240px}.technical-dates{padding-right:51px;font-size:10px}.technical-dates span:nth-child(2),.technical-dates span:nth-child(4){display:none}.indicator-readout{font-size:11px}.sub-toolbar{gap:6px}.sub-toolbar button{padding:6px 8px}.chart-note{font-size:11px}}

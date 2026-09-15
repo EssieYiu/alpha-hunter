@@ -1,0 +1,27 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+
+# Python
+**/.venv/
+**/__pycache__/
+**/.pytest_cache/
+**/*.py[cod]
+
+# Node and generated frontend output
+**/node_modules/
+apps/web/dist/
+apps/web/.npm-tool/
+apps/web/tsconfig.tsbuildinfo
+
+# Local probes, logs and editor files
+apps/api/market-probe.jsonl
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

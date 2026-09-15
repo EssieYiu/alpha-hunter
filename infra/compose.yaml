@@ -1,0 +1,55 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: alpha
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD}
+      POSTGRES_DB: alpha
+    volumes:
+      - database:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U alpha -d alpha"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+  api:
+    image: alpha-hunter-api:${APP_VERSION:?Set APP_VERSION}
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.api
+    environment:
+      DATABASE_URL: postgresql+psycopg://alpha:${DB_PASSWORD}@db:5432/alpha
+      REDIS_URL: redis://redis:6379/0
+      AGENT_ALLOWED_BASE_URLS: ${AGENT_ALLOWED_BASE_URLS:-https://api.openai.com/v1}
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 8s
+    restart: unless-stopped
+  web:
+    image: alpha-hunter-web:${APP_VERSION:?Set APP_VERSION}
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.web
+    ports:
+      - "127.0.0.1:${APP_PORT:-4175}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, "wget", "-qO-", "http://127.0.0.1/api/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped
+volumes:
+  database:
