@@ -1,0 +1,4 @@
+.model-settings select { display: block; width: 100%; margin-top: 7px; padding: 10px; border: 1px solid #dce5dc; border-radius: 5px; background: #fff; color: #4a6450; font-size: 13px; }
+.model-settings input[readonly] { background: #f5f8f6; color: #6b7e72; }
+.model-settings .model-provider-note { margin: -5px 0 16px; padding: 10px 12px; border-radius: 6px; background: #f5f8f3; color: #667c6c; font-size: 12px; line-height: 1.6; }
+.model-settings .model-provider-note a { color: #176c54; text-decoration: underline; margin-left: 6px; }

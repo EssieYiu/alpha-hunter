@@ -28,7 +28,9 @@ ssh -N -o ExitOnForwardFailure=yes -L 127.0.0.1:4175:127.0.0.1:4175 root@8.216.4
 
 ## Agent 模型服务
 
-默认只允许 `https://api.openai.com/v1`。如需使用其他兼容服务，编辑服务器共享环境文件中的 `AGENT_ALLOWED_BASE_URLS`，填写逗号分隔的精确 base URL，然后重新运行部署。用户在页面填写的 Key 只随单次消息请求传递，不存入数据库或服务器环境。
+内置允许 OpenAI、Anthropic、百炼 DashScope（北京、新加坡、美国、香港）、DeepSeek、MiniMax（中国区、国际区）的精确 API 地址。Anthropic 使用原生 Messages API，其余提供商使用 OpenAI 兼容 Chat Completions。当前 MiniMax Agent 仅支持 MiniMax-M3；M2.x 的思考内容与工具回合尚未适配。模型设置中选择提供商后可修改模型 ID；切换提供商或地域会清空当前 Key。百炼 Token Plan 官方限定用于交互式编程工具，不能用于本项目后台 Agent，请选 DashScope 按量付费 API。
+
+如需使用其他兼容服务，编辑服务器共享环境文件中的 `AGENT_ALLOWED_BASE_URLS`，填写逗号分隔的精确 base URL，然后重新运行部署。用户在页面填写的 Key 只随单次消息请求传递，不存入数据库或服务器环境。
 
 ## 状态与运维
 

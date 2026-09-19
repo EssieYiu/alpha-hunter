@@ -48,6 +48,10 @@ def call(name="list_indices", args="{}", call_id="one"):
 def test_url_exact_allowlist(monkeypatch):
     monkeypatch.setenv("AGENT_ALLOWED_BASE_URLS", "https://model.example/v1,http://localhost:11434/v1")
     assert validate_url("https://model.example/v1/") == "https://model.example/v1"
+    for built_in in ("https://api.openai.com/v1", "https://api.anthropic.com/v1",
+                     "https://dashscope.aliyuncs.com/compatible-mode/v1",
+                     "https://api.deepseek.com", "https://api.minimax.cn/v1"):
+        assert validate_url(built_in) == built_in
     for bad in ("https://model.example.evil/v1", "https://model.example/v1?key=abc",
                 "https://model.example@evil/v1", "http://169.254.169.254", "https://model.example/v1/other"):
         with pytest.raises(ModelError):
@@ -139,6 +143,82 @@ def test_transport_errors_do_not_reflect_credentials(monkeypatch):
     with pytest.raises(ModelError) as error:
         ModelClient("https://api.openai.com/v1", "secretcredential", "a").complete([], [])
     assert "secretcredential" not in str(error.value)
+
+
+def test_anthropic_native_tool_roundtrip(monkeypatch):
+    import httpx
+    requests = []
+    responses = [
+        {"content": [{"type": "thinking", "thinking": "仅供接口测试", "signature": "opaque"},
+                     {"type": "text", "text": "正在查询"},
+                     {"type": "tool_use", "id": "toolu_one", "name": "list_indices", "input": {}}]},
+        {"content": [{"type": "text", "text": "查询完成"}]},
+    ]
+
+    def handle(request):
+        requests.append(request)
+        assert request.url == "https://api.anthropic.com/v1/messages"
+        assert request.headers["x-api-key"] == "private-test-key"
+        assert request.headers["anthropic-version"] == "2023-06-01"
+        assert "authorization" not in request.headers
+        return httpx.Response(200, json=responses.pop(0))
+
+    real_client = httpx.Client
+    monkeypatch.setattr(httpx, "Client", lambda **kwargs: real_client(
+        transport=httpx.MockTransport(handle), **kwargs))
+    client = ModelClient("https://api.anthropic.com/v1", "private-test-key", "claude-sonnet-5")
+    definitions = [{"type": "function", "function": {"name": "list_indices", "description": "目录",
+                    "parameters": {"type": "object", "properties": {}}}}]
+    wire = [{"role": "system", "content": "研究助手"}, {"role": "user", "content": "列出指数"}]
+    first = client.complete(wire, definitions)
+    assert first["content"] == "正在查询"
+    assert first["tool_calls"][0]["function"]["name"] == "list_indices"
+    wire.extend([{"role": "assistant", "content": first["content"], "tool_calls": first["tool_calls"]},
+                 {"role": "tool", "tool_call_id": "toolu_one", "content": "[]"}])
+    assert client.complete(wire, definitions)["content"] == "查询完成"
+    body = json.loads(requests[1].content)
+    assert body["system"] == "研究助手"
+    assert body["thinking"] == {"type": "disabled"}
+    assert "仅供接口测试" not in json.dumps(body, ensure_ascii=False)
+    assert body["tools"][0]["input_schema"]["type"] == "object"
+    assert body["messages"][-2]["content"][-1] == {
+        "type": "tool_use", "id": "toolu_one", "name": "list_indices", "input": {}}
+    assert body["messages"][-1]["content"] == [{
+        "type": "tool_result", "tool_use_id": "toolu_one", "content": "[]"}]
+    assert "private-test-key" not in json.dumps(body)
+
+
+@pytest.mark.parametrize("url,model,expected_path,expected_field", [
+    ("https://api.openai.com/v1", "gpt-5.5", "/v1/chat/completions", "max_completion_tokens"),
+    ("https://api.deepseek.com", "deepseek-flash", "/chat/completions", "thinking"),
+    ("https://api.minimax.cn/v1", "MiniMax-M3", "/v1/chat/completions", "max_completion_tokens"),
+])
+def test_compatible_provider_transport(monkeypatch, url, model, expected_path, expected_field):
+    import httpx
+    real_client = httpx.Client
+
+    def handle(request):
+        assert request.url.path == expected_path
+        assert request.headers["authorization"] == "Bearer private-test-key"
+        body = json.loads(request.content)
+        assert body["model"] == model and expected_field in body
+        if expected_field == "max_completion_tokens":
+            assert "max_tokens" not in body
+        if expected_field == "thinking":
+            assert body["thinking"] == {"type": "disabled"}
+        if url == "https://api.minimax.cn/v1":
+            assert body["thinking"] == {"type": "disabled"}
+        return httpx.Response(200, json={"choices": [{"message": {"content": "完成"}}]})
+
+    monkeypatch.setattr(httpx, "Client", lambda **kwargs: real_client(
+        transport=httpx.MockTransport(handle), **kwargs))
+    assert ModelClient(url, "private-test-key", model).complete(
+        [{"role": "user", "content": "你好"}], [])["content"] == "完成"
+
+
+def test_minimax_thinking_models_are_not_sent_without_replay_support():
+    with pytest.raises(ModelError, match="仅支持 MiniMax-M3"):
+        ModelClient("https://api.minimax.io/v1", "private-test-key", "MiniMax-M2.7")
 
 
 def test_http_roundtrip_and_failed_request_preserves_history(db, monkeypatch):
