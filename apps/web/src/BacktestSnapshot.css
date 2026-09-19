@@ -1,0 +1,4 @@
+.backtest-snapshot code{overflow-wrap:anywhere}
+.backtest-snapshot details{margin-top:12px}
+.backtest-snapshot summary{cursor:pointer;color:#47794d}
+.backtest-snapshot pre{max-height:360px;overflow:auto;margin:10px 0 0;padding:14px;background:#f6f8f5;border:1px solid #dce5dc;border-radius:6px;font:12px/1.6 Consolas,"Courier New",monospace;white-space:pre-wrap}

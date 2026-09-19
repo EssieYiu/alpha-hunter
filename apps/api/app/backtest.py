@@ -2,11 +2,16 @@
 from decimal import Decimal
 from .indicators import sma, ema, rsi
 
-def simulate(bars, strategy, capital, fee, slippage, start, end):
+def simulate(bars, strategy, capital, fee, slippage, start, end, signals=None):
     capital=Decimal(str(capital));fee=Decimal(str(fee))/100;slippage=Decimal(str(slippage))/100
     cash=capital;qty=Decimal(0);pending=None;peak=capital;equity=[];trades=[];total_fees=Decimal(0)
-    closes=[float(b['close']) for b in bars]
-    typ=strategy['type'];f=(ema if typ=='EMA' else sma)(closes,strategy['fast']);s=(ema if typ=='EMA' else sma)(closes,strategy['slow']);rs=rsi(closes,strategy['fast'])
+    typ=strategy['type']
+    if typ=='CODE':
+        if signals is None or len(signals)!=len(bars):raise ValueError('自定义策略信号与行情长度不匹配')
+        f=s=rs=None
+    else:
+        closes=[float(b['close']) for b in bars]
+        f=(ema if typ=='EMA' else sma)(closes,strategy['fast']);s=(ema if typ=='EMA' else sma)(closes,strategy['slow']);rs=rsi(closes,strategy['fast'])
     benchmark_start=None;max_dd=Decimal(0)
     for i,b in enumerate(bars):
         in_range=start<=b['session_date']<=end
@@ -21,9 +26,12 @@ def simulate(bars, strategy, capital, fee, slippage, start, end):
             trades.append({'time':b['time'],'side':'sell','price':str(price),'quantity':str(qty),'fee':str(commission)});qty=Decimal(0)
         pending=None
         value=cash+qty*close;peak=max(peak,value);dd=(peak-value)/peak*100;max_dd=max(max_dd,dd)
-        equity.append({'time':b['time'],'equity':str(value),'benchmark':str(capital*close/benchmark_start),'drawdown':float(dd)})
+        equity.append({'time':b.get('end_time',b['time']),'equity':str(value),'benchmark':str(capital*close/benchmark_start),'drawdown':float(dd)})
         if not b.get('is_final',True):continue
-        if typ=='RSI' and rs[i] is not None:
+        if typ=='CODE':
+            if signals[i]=='BUY' and qty==0:pending='buy'
+            elif signals[i]=='SELL' and qty>0:pending='sell'
+        elif typ=='RSI' and rs[i] is not None:
             if rs[i]<strategy['lower'] and qty==0:pending='buy'
             elif rs[i]>strategy['upper'] and qty>0:pending='sell'
         elif typ in ('MA','EMA') and i>0 and s[i] is not None and s[i-1] is not None:

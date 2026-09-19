@@ -8,7 +8,7 @@ export async function api<T>(path:string, body?:unknown, method=body===undefined
 export type Index={id:string;name:string;code:string;market:string;category?:string;aliases?:string;value?:string;change?:string};
 export type Point={time:number;value:number};
 export type Bars={bars:{time:number;open:number;high:number;low:number;close:number;volume:number|null}[];indicators?:Record<string,Point[]>;provider:string;as_of:string|null;unavailable_reason:string|null;freshness?:string;freshness_reason?:string;stale?:boolean};
-export type Strategy={id:string;name:string;type:string;period:string;fast:number;slow:number;lower:number;upper:number;description:string;version?:number};
+export type Strategy={id:string;name:string;type:'MA'|'EMA'|'RSI'|'CODE';period:'day'|'week'|'month';fast?:number;slow?:number;lower?:number;upper?:number;lookback?:number;source?:string;description:string;version:number};
 export type Account={cash:string;positions:{ticker:string;quantity:string;cost:string}[];ledger:{id:string;ticker:string;side:string;quantity:string;price:string;fee:string;created_at:string}[]};
 export type Run={id:string;status:string;error?:string;result?:{strategy_snapshot:Strategy;metrics:Record<string,string|number>;equity:{time:number;equity:string;benchmark:string;drawdown:string}[];trades:{time:number;side:string;price:string;quantity:string;fee:string}[];provider?:string;[key:string]:unknown}};
 export type Conversation={id:string;title:string;created_at:string;messages?:{id:string;role:string;content:string;created_at:string;tool_calls?:{name:string;arguments:unknown;result:unknown;status:string}[]}[]};

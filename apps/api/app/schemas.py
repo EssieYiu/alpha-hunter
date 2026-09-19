@@ -17,7 +17,21 @@ class StrategyInput(StrictInput):
     description: str = Field(default='',max_length=2000)
     @model_validator(mode='after')
     def validate_ranges(self):
-        if self.fast >= self.slow or self.lower >= self.upper: raise ValueError('短周期必须小于长周期，低阈值必须小于高阈值')
+        if (self.type != 'RSI' and self.fast >= self.slow) or self.lower >= self.upper: raise ValueError('短周期必须小于长周期，低阈值必须小于高阈值')
+        return self
+
+class CodeStrategyInput(StrictInput):
+    name: str = Field(min_length=1,max_length=100)
+    type: Literal['CODE'] = 'CODE'
+    period: Literal['day','week','month'] = 'day'
+    lookback: int = Field(default=100,ge=2,le=500)
+    source: str = Field(min_length=1,max_length=20000)
+    description: str = Field(default='',max_length=2000)
+
+    @model_validator(mode='after')
+    def validate_code(self):
+        from .code_strategy import validate_source
+        validate_source(self.source)
         return self
 
 class TradeInput(StrictInput):

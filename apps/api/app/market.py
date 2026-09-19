@@ -35,7 +35,7 @@ def aggregate(bars,period):
         groups.setdefault(key,[]).append(b)
     out=[]
     for group in groups.values():
-        out.append({**group[0],'high':str(max(float(b['high']) for b in group)),'low':str(min(float(b['low']) for b in group)),'close':group[-1]['close'],'volume':sum(b['volume'] for b in group) if all(b['volume'] is not None for b in group) else None,'end_time':group[-1]['time'],'is_final':all(b['is_final'] for b in group)})
+        out.append({**group[0],'high':str(max(float(b['high']) for b in group)),'low':str(min(float(b['low']) for b in group)),'close':group[-1]['close'],'volume':sum(b['volume'] for b in group) if all(b['volume'] is not None for b in group) else None,'end_time':group[-1]['time'],'end_session_date':group[-1]['session_date'],'is_final':all(b['is_final'] for b in group)})
     # Last partial week/month cannot produce a completed-period signal.
     if out:
         last=date.fromisoformat(bars[-1]['session_date']);today=date.today()

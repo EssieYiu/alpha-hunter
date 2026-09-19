@@ -1,11 +1,11 @@
 from datetime import date,timedelta
-from fastapi import FastAPI,Depends,HTTPException,Query
+from fastapi import FastAPI,Depends,HTTPException,Query,Request
 from pydantic import BaseModel,Field
 from sqlalchemy import text
 from .db import get_db
 from .catalog import INDICES, BY_ID, PRODUCTS
 from .models import Setting,Strategy
-from .schemas import StrategyInput,TradeInput,AdjustmentInput,BacktestInput
+from .schemas import StrategyInput,CodeStrategyInput,TradeInput,AdjustmentInput,BacktestInput
 from . import services
 from .market import get_bars
 from fastapi.exceptions import RequestValidationError
@@ -14,7 +14,10 @@ from fastapi.responses import JSONResponse
 app=FastAPI(title='Alpha Hunter API',version='0.1.0')
 
 @app.exception_handler(RequestValidationError)
-def validation_error(request,exc):
+def validation_error(request:Request,exc:RequestValidationError):
+    if request.url.path.startswith('/api/code-strategies'):
+        messages=[str(item.get('msg','参数不合法'))[:300] for item in exc.errors()]
+        return JSONResponse(status_code=422,content={'detail':'；'.join(messages[:3])})
     return JSONResponse(status_code=422,content={'detail':'请求参数不合法，请检查字段类型、范围和必填项'})
 
 @app.get('/api/health')
@@ -51,6 +54,10 @@ def adjust(payload:AdjustmentInput,db=Depends(get_db)):return services.adjust_po
 def strategies(db=Depends(get_db)):return services.list_strategies(db)
 @app.post('/api/strategies')
 def create(payload:StrategyInput,db=Depends(get_db)):return services.create_strategy(db,payload)
+@app.post('/api/code-strategies')
+def create_code(payload:CodeStrategyInput,db=Depends(get_db)):return services.create_code_strategy(db,payload)
+@app.put('/api/code-strategies/{id}')
+def update_code(id:str,payload:CodeStrategyInput,db=Depends(get_db)):return services.update_code_strategy(db,id,payload)
 @app.put('/api/strategies/{id}')
 def update(id:str,payload:StrategyInput,db=Depends(get_db)):return services.update_strategy(db,id,payload)
 @app.delete('/api/strategies/{id}')

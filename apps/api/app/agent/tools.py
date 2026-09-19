@@ -52,11 +52,20 @@ def execute(db, name: str, arguments: str):
     if name == "list_indices":
         return INDICES
     if name == "list_strategies":
-        return services.list_strategies(db)
+        return [{k: v for k, v in strategy.items() if k != "source"}
+                for strategy in services.list_strategies(db)]
     if name == "create_strategy":
         return services.create_strategy(db, args)
     if name == "get_backtest":
-        return services.get_backtest(db, args.backtest_id)
+        backtest = services.get_backtest(db, args.backtest_id)
+        result = backtest.get("result")
+        if not isinstance(result, dict):
+            return backtest
+        snapshot = result.get("strategy_snapshot")
+        if not isinstance(snapshot, dict):
+            return backtest
+        return {**backtest, "result": {**result, "strategy_snapshot":
+                {key: value for key, value in snapshot.items() if key != "source"}}}
     result = market.get_bars(args.index_id, args.interval)
     # Recent bars suffice for discussion. Full data remains available through market API.
     return {**result, "bars": result.get("bars", [])[-30:],

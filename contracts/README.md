@@ -8,6 +8,7 @@
 - `GET /watchlist`：指数 ID 数组；`PUT /watchlist`：`{ids:[]}`。
 - `GET /account`：`{cash,positions:[],ledger:[]}`；`POST /trades`：幂等键、ticker、side、quantity、price、fee。金额字符串。
 - `GET /strategies`：策略数组；`POST /strategies` 与 `PUT /strategies/{id}`：`{name,type,period,fast,slow,lower,upper,description}`，与原型字段一致，返回 `id,version` 及配置。
+- `POST /code-strategies` 与 `PUT /code-strategies/{id}`：`{name,type:"CODE",period,lookback,source,description}`。`source` 定义继承 `StrategyBase` 的 `CustomStrategy` 并实现 `on_bar(self, history)`，格式见 `docs/code-strategies.md`。`GET /strategies` 同时列出模板和代码策略。
 - `POST /backtests`：`{strategy_id,index_id,start,end,capital,fee,slippage}`，费率输入按百分数；返回带 `id,status` 的任务。`GET /backtests/{id}` 查询状态与结果，结果包含策略快照、指标、净值/基准、交易。
 - `GET /conversations`、`POST /conversations`、`GET /conversations/{id}`：持久历史。`POST /conversations/{id}/messages`：`{message,model,base_url,api_key,context?}`，一期 JSON 回答与工具记录可先集成，SSE 后续补齐。context 可携带 backtest_id / index_id；Key 不持久化。
 
